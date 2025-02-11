@@ -60,32 +60,33 @@ function updateGame() {
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
         ctx.font = '48px "Press Start 2P", Arial';
-        ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
+        ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
         ctx.font = '24px "Press Start 2P", Arial';
-        ctx.fillText('Press Space to Restart', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText('Press Space or Tap to Restart', canvas.width / 2, canvas.height / 2 + 40);
         return;
     }
 
-    // Clear canvas by filling with a black background
+    // Clear canvas using a black background
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Update player position
+    // Update player position and physics
     player.y += player.jumpForce;
     player.jumpForce += player.gravity;
 
-    // Ground collision
+    // Ground collision detection
     if (player.y > canvas.height - player.height) {
         player.y = canvas.height - player.height;
         player.jumping = false;
         player.jumpForce = 0;
     }
 
-    // Update obstacles
+    // Add new obstacles occasionally
     if (Math.random() < 0.02) {
         obstacles.push(createObstacle());
     }
 
+    // Update and filter obstacles
     obstacles = obstacles.filter(obstacle => {
         obstacle.x -= 5;
         if (checkCollision(obstacle)) {
@@ -94,43 +95,50 @@ function updateGame() {
         return obstacle.x > -obstacle.width;
     });
 
-    // Update score
+    // Update score and display it
     score++;
-    scoreElement.textContent = `Score: ${Math.floor(score/10)}`;
+    scoreElement.textContent = `Score: ${Math.floor(score / 10)}`;
 
-    // Draw everything
+    // Draw the player and obstacles on screen
     drawPlayer();
     obstacles.forEach(drawObstacle);
 
-    // Continue game loop
+    // Continue the game loop
     requestAnimationFrame(updateGame);
 }
 
-// Event listeners
-window.addEventListener('keydown', (event) => {
-    if ((event.code === 'Space' || event.key === ' ' || event.keyCode === 32) && !spacePressed) {
-        spacePressed = true;
-        event.preventDefault(); // Prevent page scrolling
-        
+// Function to reset game state after a game over.
+function resetGame() {
+    gameOver = false;
+    score = 0;
+    obstacles = [];
+    player.y = canvas.height - player.height;
+    player.jumping = false;
+    player.jumpForce = 0;
+    // Restart the game loop
+    requestAnimationFrame(updateGame);
+}
+
+// Keyboard event listener for desktop (Space bar to jump or restart)
+document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+        event.preventDefault();
         if (gameOver) {
-            // Reset game
-            gameOver = false;
-            score = 0;
-            obstacles = [];
-            player.y = canvas.height - player.height;
-            player.jumping = false;
-            player.jumpForce = 0;
-            // Start the game loop again
-            requestAnimationFrame(updateGame);
+            resetGame();
         } else {
             jump();
         }
     }
 });
 
-window.addEventListener('keyup', (event) => {
-    if (event.code === 'Space' || event.key === ' ' || event.keyCode === 32) {
-        spacePressed = false;
+// Mobile touch event listener for tapping on the canvas
+canvas.addEventListener('touchstart', (event) => {
+    // Prevent default behavior (e.g., scrolling)
+    event.preventDefault();
+    if (gameOver) {
+        resetGame();
+    } else {
+        jump();
     }
 });
 
