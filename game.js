@@ -2,17 +2,16 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 
-// Scale obstacle and player to double the size.
-// The obstacle is now 40px wide and the player (half its width) is 20×20.
-// Gravity and jump force have been doubled to preserve the jump arc.
+// Scale obstacle and player to double the size for the player.
+// The player remains 20x20, but obstacles are now reduced by 50% (i.e. original size).
 const player = {
     x: 50,
-    y: canvas.height - 20,  // updated: player height is now 20px
+    y: canvas.height - 20,  // player height is 20px
     width: 20,
     height: 20,
     jumping: false,
     jumpForce: 0,
-    gravity: 1.6  // doubled gravity for balanced jump physics
+    gravity: 1.6  // balanced jump physics
 };
 
 let obstacles = [];
@@ -21,8 +20,11 @@ let gameOver = false;
 let lives = 3;            // Giving the user three lives
 let invincible = false;   // Temporary invincibility after collision
 
-// Global flag to check if space is held down
+// Global flags and variables for long jump feature
 let spacePressed = false;
+let jumpHoldDuration = 0;
+const maxJumpHoldTime = 15;  // Maximum frames the jump can be prolonged
+const jumpHoldFactor = 0.5;  // Reduced gravity while holding jump
 
 // Helper function to draw an 8-bit (pixelated) circle.
 // It draws a circle by iterating over each pixel in the bounding box.
@@ -50,13 +52,13 @@ function drawPlayer() {
     draw8BitCircle(player.x, player.y, player.width, 'orange');
 }
 
-// Create an obstacle scaled to double size.
+// Create an obstacle with reduced size (50% smaller than before).
 function createObstacle() {
     return {
         x: canvas.width,
-        y: canvas.height - 60,            // adjusted: obstacle sits 60px above canvas bottom
-        width: 40,                        // doubled from 20px
-        height: Math.random() * 100 + 60,   // doubled range (was Math.random()*50 + 30)
+        y: canvas.height - 30,            // adjusted so the obstacle sits on the ground
+        width: 20,                        // reduced from 40px
+        height: Math.random() * 50 + 30,    // reduced from (Math.random()*100 + 60)
         scored: false                     // flag to track if bonus points were already awarded
     };
 }
@@ -66,7 +68,7 @@ function drawObstacle(obstacle) {
     ctx.fillRect(obstacle.x, obstacle.y - obstacle.height, obstacle.width, obstacle.height);
 }
 
-// Adjusted jump: the jump force is now -30 to match the new scale.
+// Initiate the jump.
 function jump() {
     if (!player.jumping) {
         player.jumpForce = -30;
@@ -117,15 +119,32 @@ function updateGame() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Update player position and physics
+    // Update player position.
     player.y += player.jumpForce;
-    player.jumpForce += player.gravity;
+
+    // Clamp player's top position so they never leave the visible canvas.
+    if (player.y < 0) {
+        player.y = 0;
+        jumpHoldDuration = maxJumpHoldTime;  // Stop applying long jump boost.
+        if (player.jumpForce < 0) {
+            player.jumpForce = 0;
+        }
+    }
+
+    // Apply long jump boost if jump is held.
+    if (player.jumping && spacePressed && jumpHoldDuration < maxJumpHoldTime) {
+        player.jumpForce += player.gravity * jumpHoldFactor;
+        jumpHoldDuration++;
+    } else {
+        player.jumpForce += player.gravity;
+    }
 
     // Ground collision detection
     if (player.y > canvas.height - player.height) {
         player.y = canvas.height - player.height;
         player.jumping = false;
         player.jumpForce = 0;
+        jumpHoldDuration = 0; // Reset jump hold duration on landing
     }
 
     // Add new obstacles occasionally
@@ -137,8 +156,8 @@ function updateGame() {
     obstacles = obstacles.filter(obstacle => {
         obstacle.x -= 5;
 
-        // Award extra bonus points if the obstacle has been successfully jumped over.
-        // Since the display shows Math.floor(score/10), adding 1000 raw points reflects an extra 100 displayed points.
+        // Award extra bonus points if an obstacle is successfully jumped over.
+        // Adding 1000 raw points reflects an extra 100 displayed points.
         if (!obstacle.scored && obstacle.x + obstacle.width < player.x) {
             score += 1000;
             obstacle.scored = true;
@@ -148,7 +167,7 @@ function updateGame() {
             if (!invincible) {
                 loseLife();
             }
-            return false; // Remove the obstacle that hit the player
+            return false; // Remove the obstacle that hit the player.
         }
         return obstacle.x > -obstacle.width;
     });
@@ -182,31 +201,50 @@ function resetGame() {
     player.y = canvas.height - player.height;
     player.jumping = false;
     player.jumpForce = 0;
+    jumpHoldDuration = 0;
     // Restart the game loop
     requestAnimationFrame(updateGame);
 }
 
-// Keyboard event listener for desktop (Space bar to jump or restart)
+// Keyboard event listeners for desktop
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {
         event.preventDefault();
+        spacePressed = true;
         if (gameOver) {
             resetGame();
         } else {
+            if (!player.jumping) {
+                jump();
+            }
+        }
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.code === 'Space') {
+        spacePressed = false;
+        jumpHoldDuration = 0;
+    }
+});
+
+// Mobile touch event listeners for long jump
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+    spacePressed = true;
+    if (gameOver) {
+        resetGame();
+    } else {
+        if (!player.jumping) {
             jump();
         }
     }
 });
 
-// Mobile touch event listener for tapping on the canvas
-canvas.addEventListener('touchstart', (event) => {
-    // Prevent default behavior (e.g., scrolling)
+canvas.addEventListener('touchend', (event) => {
     event.preventDefault();
-    if (gameOver) {
-        resetGame();
-    } else {
-        jump();
-    }
+    spacePressed = false;
+    jumpHoldDuration = 0;
 });
 
 // Start the game
