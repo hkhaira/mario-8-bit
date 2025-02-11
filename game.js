@@ -26,6 +26,10 @@ let jumpHoldDuration = 0;
 const maxJumpHoldTime = 15;  // Maximum frames the jump can be prolonged
 const jumpHoldFactor = 0.5;  // Reduced gravity while holding jump
 
+// New global variables for holding at the top.
+let holdAtTopTimer = 0;
+const maxHoldAtTop = 300;    // Frames to hold at the top before descending
+
 // Helper function to draw an 8-bit (pixelated) circle.
 // It draws a circle by iterating over each pixel in the bounding box.
 function draw8BitCircle(x, y, diameter, color) {
@@ -71,7 +75,7 @@ function drawObstacle(obstacle) {
 // Initiate the jump.
 function jump() {
     if (!player.jumping) {
-        player.jumpForce = -30;
+        player.jumpForce = -26;
         player.jumping = true;
     }
 }
@@ -122,21 +126,27 @@ function updateGame() {
     // Update player position.
     player.y += player.jumpForce;
 
-    // Clamp player's top position so they never leave the visible canvas.
+    // If player would go above the top, clamp to 0 and hold there.
     if (player.y < 0) {
         player.y = 0;
-        jumpHoldDuration = maxJumpHoldTime;  // Stop applying long jump boost.
-        if (player.jumpForce < 0) {
+        if (holdAtTopTimer < maxHoldAtTop) {
+            holdAtTopTimer++;
+            // Freeze vertical velocity while holding.
             player.jumpForce = 0;
+        } else {
+            // After hold, let gravity take over to make the player descend.
+            player.jumpForce += player.gravity;
         }
-    }
-
-    // Apply long jump boost if jump is held.
-    if (player.jumping && spacePressed && jumpHoldDuration < maxJumpHoldTime) {
-        player.jumpForce += player.gravity * jumpHoldFactor;
-        jumpHoldDuration++;
     } else {
-        player.jumpForce += player.gravity;
+        // Normal jump update when not at the top.
+        if (player.jumping && spacePressed && jumpHoldDuration < maxJumpHoldTime) {
+            player.jumpForce += player.gravity * jumpHoldFactor;
+            jumpHoldDuration++;
+        } else {
+            player.jumpForce += player.gravity;
+        }
+        // Reset top-hold timer if not at the top.
+        holdAtTopTimer = 0;
     }
 
     // Ground collision detection
@@ -144,7 +154,8 @@ function updateGame() {
         player.y = canvas.height - player.height;
         player.jumping = false;
         player.jumpForce = 0;
-        jumpHoldDuration = 0; // Reset jump hold duration on landing
+        jumpHoldDuration = 0;
+        holdAtTopTimer = 0;
     }
 
     // Add new obstacles occasionally
@@ -202,6 +213,7 @@ function resetGame() {
     player.jumping = false;
     player.jumpForce = 0;
     jumpHoldDuration = 0;
+    holdAtTopTimer = 0;
     // Restart the game loop
     requestAnimationFrame(updateGame);
 }

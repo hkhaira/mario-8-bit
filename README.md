@@ -1,6 +1,8 @@
-<div align="center">
-  <a href="https://hkhaira.github.io/mario-8-bit/" style="display: inline-block; padding: 20px 40px; font-size: 32px; font-weight: bold; text-decoration: none; color: black; background-color: #FF4500; border-radius: 8px; margin-bottom: 20px;">PLAY NOW</a>
-</div>
+<p align="center">
+  
+[![PLAY NOW](https://img.shields.io/badge/PLAY%20NOW-FF4500?style=for-the-badge&logo=nintendo&logoColor=black&color=FF4500&labelColor=FF4500&size=200)](https://hkhaira.github.io/mario-8-bit/)
+
+</p>
 
 # Mario 8-Bit Jump Game 🎮
 
