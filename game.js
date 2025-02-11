@@ -56,7 +56,8 @@ function createObstacle() {
         x: canvas.width,
         y: canvas.height - 60,            // adjusted: obstacle sits 60px above canvas bottom
         width: 40,                        // doubled from 20px
-        height: Math.random() * 100 + 60    // doubled range (was Math.random()*50 + 30)
+        height: Math.random() * 100 + 60,   // doubled range (was Math.random()*50 + 30)
+        scored: false                     // flag to track if bonus points were already awarded
     };
 }
 
@@ -132,9 +133,17 @@ function updateGame() {
         obstacles.push(createObstacle());
     }
 
-    // Update and filter obstacles
+    // Update, award bonus for successful jumps, and filter obstacles
     obstacles = obstacles.filter(obstacle => {
         obstacle.x -= 5;
+
+        // Award extra bonus points if the obstacle has been successfully jumped over.
+        // Since the display shows Math.floor(score/10), adding 1000 raw points reflects an extra 100 displayed points.
+        if (!obstacle.scored && obstacle.x + obstacle.width < player.x) {
+            score += 1000;
+            obstacle.scored = true;
+        }
+
         if (checkCollision(obstacle)) {
             if (!invincible) {
                 loseLife();
