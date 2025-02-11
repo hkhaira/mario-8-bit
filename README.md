@@ -1,3 +1,5 @@
+# PLAY NOW - [https://hkhaira.github.io/mario-8-bit/](https://hkhaira.github.io/mario-8-bit/)
+
 # Mario 8-Bit Jump Game 🎮
 
 A simple yet fun 8-bit style jumping game built with JavaScript and HTML5 Canvas. Jump over obstacles, score points, and try to beat your own record!
@@ -31,9 +33,9 @@ A simple yet fun 8-bit style jumping game built with JavaScript and HTML5 Canvas
 ## How to Play
 
 1. **Starting the Game:** The game automatically starts when loaded.
-2. **Jump:** Press **SPACE** to jump over obstacles.
+2. **Jump:** Press **SPACE** (or tap the screen on mobile devices) to jump over obstacles.
 3. **Avoid Obstacles:** Purple obstacles will appear; don't collide with them!
-4. **Restarting:** When you get hit, the game will show a "Game Over" screen. Press **SPACE** to restart.
+4. **Restarting:** When you get hit, the game will show a "Game Over" screen. Press **SPACE** or tap the screen to restart.
 
 ---
 
@@ -114,10 +116,10 @@ After editing your code, simply refresh the page in your browser (or restart the
 
 Below are sample screenshots of the game:
 
-![Game Start](screenshots/game-start.png)
+![Game Start](screenshots/newgame.png)
 *The game start screen with the title and score.*
 
-![Game Over](screenshots/game-over.png)
+![Game Over](screenshots/gameover.png)
 *Example of the Game Over screen.*
 
 *Note: Add your own screenshots in a `screenshots/` folder and update the image paths as needed.*
@@ -165,4 +167,4 @@ If you have any questions or issues with the project, please open an issue on th
 
 ---
 
-Made with ❤️ by Happy
+Made with ❤️ by Happy!
