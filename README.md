@@ -1,4 +1,6 @@
-# PLAY NOW - [https://hkhaira.github.io/mario-8-bit/](https://hkhaira.github.io/mario-8-bit/)
+<div align="center">
+  <a href="https://hkhaira.github.io/mario-8-bit/" style="display: inline-block; padding: 20px 40px; font-size: 32px; font-weight: bold; text-decoration: none; color: black; background-color: #FF4500; border-radius: 8px; margin-bottom: 20px;">PLAY NOW</a>
+</div>
 
 # Mario 8-Bit Jump Game 🎮
 
