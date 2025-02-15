@@ -241,7 +241,7 @@ document.addEventListener('keyup', (event) => {
 });
 
 // Mobile touch event listeners for long jump
-canvas.addEventListener('touchstart', (event) => {
+document.addEventListener('touchstart', (event) => {
     event.preventDefault();
     spacePressed = true;
     if (gameOver) {
@@ -253,7 +253,7 @@ canvas.addEventListener('touchstart', (event) => {
     }
 });
 
-canvas.addEventListener('touchend', (event) => {
+document.addEventListener('touchend', (event) => {
     event.preventDefault();
     spacePressed = false;
     jumpHoldDuration = 0;
